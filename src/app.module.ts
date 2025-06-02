@@ -26,22 +26,26 @@ import { AppController } from './app.controller';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        // Railway puede usar MONGODB_URI o MONGO_URI
-        const mongoUri = 
-          configService.get('MONGODB_URI') || 
-          configService.get('MONGO_URI') || 
-          'mongodb://localhost:27017/cozyapp';
-        
-        const dbName = configService.get('MONGO_DB_NAME') || 'cozyapp';
-        
-        console.log(`🔗 Connecting to MongoDB: ${mongoUri.split('@')[1] || mongoUri}`);
-        
-        return {
-          uri: mongoUri,
-          dbName: dbName,
-        };
-      },
+     useFactory: (configService: ConfigService) => {
+  // Railway puede usar MONGODB_URI o MONGO_URI
+  const mongoUri = 
+    configService.get('MONGODB_URI') || 
+    configService.get('MONGO_URI') || 
+    'mongodb://localhost:27017/cozyapp';
+  
+  const dbName = configService.get('MONGO_DB_NAME') || 'cozyapp';
+  
+  // Debug temporal - mostrar qué variables están disponibles
+  console.log('🔍 Environment variables check:');
+  console.log('- MONGODB_URI:', configService.get('MONGODB_URI') ? 'SET' : 'NOT SET');
+  console.log('- MONGO_URI:', configService.get('MONGO_URI') ? 'SET' : 'NOT SET');
+  console.log('- Using URI:', mongoUri);
+  
+  return {
+    uri: mongoUri,
+    dbName: dbName,
+  };
+},
     }),
     SharedModule,
     AuthModule,
