@@ -14,36 +14,49 @@ import { AuthGuard } from './auth/guards/auth/auth.guard';
 import { ThemeModule } from './theme/theme.module';
 import { EmailService } from './shared/services/email.service';
 import { MockEmailService } from './shared/services/mock-email.service';
+import { HealthModule } from './health/health.module';
 ;
  
-
 @Module({
-    imports: [
-      ConfigModule.forRoot({
-        isGlobal: true,
-      }),
-      MongooseModule.forRootAsync({
-        imports: [ConfigModule],
-        inject: [ConfigService],
-        useFactory: (configService: ConfigService) => ({
-          uri: configService.get('MONGO_URI') || 'mongodb://localhost:27017/cozyapp',
-          dbName: configService.get('MONGO_DB_NAME') || 'cozyapp',
-        }),
-      }),
-      SharedModule,
-      AuthModule,
-      TaskModule,
-      TaskListModule,
-      GlobalEventModule,
-      PomodoroModule,
-      StatsModule,
-      ThemeModule
-    ],
-    providers: [ {
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        // Railway puede usar MONGODB_URI o MONGO_URI
+        const mongoUri = 
+          configService.get('MONGODB_URI') || 
+          configService.get('MONGO_URI') || 
+          'mongodb://localhost:27017/cozyapp';
+        
+        const dbName = configService.get('MONGO_DB_NAME') || 'cozyapp';
+        
+        console.log(`🔗 Connecting to MongoDB: ${mongoUri.split('@')[1] || mongoUri}`);
+        
+        return {
+          uri: mongoUri,
+          dbName: dbName,
+        };
+      },
+    }),
+    SharedModule,
+    AuthModule,
+    TaskModule,
+    TaskListModule,
+    GlobalEventModule,
+    PomodoroModule,
+    StatsModule,
+    ThemeModule,
+    HealthModule
+  ],
+  providers: [
+    {
       provide: EmailService,
       useClass: process.env.NODE_ENV === 'production' ? EmailService : MockEmailService,
- } ]
-
-    
+    }
+  ]
 })
 export class AppModule {}

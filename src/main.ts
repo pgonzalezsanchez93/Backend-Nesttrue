@@ -6,18 +6,25 @@ import { User } from './auth/entities/user.entity';
 import { initializeApp } from './app.init';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+   const app = await NestFactory.create(AppModule);
 
-  // CORS Configuration
+
+  const corsOrigins = [
+    'http://localhost:4200', 
+    'http://127.0.0.1:4200',
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN
+  ].filter(Boolean); 
+
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://127.0.0.1:4200'], 
+    origin: corsOrigins,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Authorization']
   });
 
-  // Global Validation Pipe
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -31,7 +38,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  // Initialize App (Create Admin User)
+
   try {
     const userModel = app.get(getModelToken(User.name));
     await initializeApp(userModel);
@@ -39,17 +46,18 @@ async function bootstrap() {
     console.error('Error during app initialization:', error);
   }
 
-  // Port Configuration with fallback
+ 
   const PORT = process.env.PORT || 3000;
   
-  // Try to start on the preferred port, if not available, try alternatives
   try {
-    await app.listen(PORT);
+   
+    await app.listen(PORT, '0.0.0.0');
     console.log(`===========================================`);
     console.log(`🚀 App running on port: ${PORT}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📊 Database: ${process.env.MONGO_URI ? 'Connected' : 'Local'}`);
-    console.log(`🔗 Frontend URL: ${process.env.CORS_ORIGIN || 'http://localhost:4200'}`);
+    console.log(`📊 Database: ${process.env.MONGO_URI || process.env.MONGODB_URI ? 'Connected' : 'Local'}`);
+    console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:4200'}`);
+    console.log(`🔗 CORS Origins: ${corsOrigins.join(', ')}`);
     console.log(`===========================================`);
   } catch (error) {
     if (error.code === 'EADDRINUSE') {
