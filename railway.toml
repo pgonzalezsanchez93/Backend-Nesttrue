@@ -10,3 +10,12 @@ restartPolicyMaxRetries = 3
 
 [env]
 NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ['nodejs_20', 'npm']
+
+[phases.build]
+cmds = ['npm ci', 'npm run build']
+
+[phases.start]
+cmd = 'npm run start:prod'
