@@ -52,6 +52,7 @@ import { HealthModule } from './health/health.module';
     ThemeModule,
     HealthModule
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: EmailService,
