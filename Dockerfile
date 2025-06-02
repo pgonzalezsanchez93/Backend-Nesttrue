@@ -1,29 +1,34 @@
-# Usar Node.js 20 LTS
-FROM node:20-alpine
+FROM node:18-alpine
 
-# Instalar herramientas necesarias
-RUN apk add --no-cache bash
-
-# Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar package.json y package-lock.json
+# Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar todas las dependencias (incluyendo devDependencies para el build)
-RUN npm ci
+# Instalar dependencias
+RUN npm ci --only=production && npm cache clean --force
 
 # Copiar código fuente
 COPY . .
 
-# Construir la aplicación usando npx
-RUN npx nest build
+# Construir la aplicación
+RUN npm run build
 
-# Limpiar devDependencies después del build
-RUN npm ci --only=production && npm cache clean --force
+# Crear usuario no-root para seguridad
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nestjs -u 1001
 
-# Exponer el puerto
+# Cambiar propietario de la aplicación
+RUN chown -R nestjs:nodejs /app
+
+# Cambiar a usuario no-root
+USER nestjs
+
+# Exponer puerto
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
+# Variables de entorno de producción
+ENV NODE_ENV=production
+
+# Comando de inicio
 CMD ["npm", "run", "start:prod"]

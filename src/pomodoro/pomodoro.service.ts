@@ -6,12 +6,7 @@ import { PomodoroSession } from './entities/pomodro-session.entity';
 import { CreatePomodoroSessionDto, PomodoroMode } from './dto/create-pomodoro-session.dto';
 import { UpdatePomodoroSettingsDto } from './dto/update-pomodoro-settings.dto';
 import moment from 'moment';
-import { BehaviorSubject, catchError, interval, Observable, of, Subscription } from 'rxjs';
-import { PomodoroSettings } from '../../../cozyApp/src/app/auth/interfaces/user.interface';
-import { environment } from '../../../cozyApp/src/environments/environments';
-import { PomodoroStatus } from '../../../cozyApp/src/app/pomodoro/interfaces/pomodoro-enums';
-import { PomodoroState } from '../../../cozyApp/src/app/pomodoro/interfaces/pomodoro-state.interface';
-import { HttpClient } from '@angular/common/http';
+
 
 interface PomodoroSettingsComplete {
   workDuration: number;
@@ -23,7 +18,6 @@ interface PomodoroSettingsComplete {
   soundEnabled: boolean;
   notificationsEnabled: boolean;
 }
-
 @Injectable()
 export class PomodoroService {
   constructor(
@@ -112,7 +106,6 @@ export class PomodoroService {
       user.preferences = {};
     }
 
-    // Configuración por defecto
     const defaultSettings = {
       workDuration: 25,
       shortBreakDuration: 5,
@@ -124,10 +117,10 @@ export class PomodoroService {
       notificationsEnabled: true
     };
 
-    // Obtener configuración actual o usar objeto vacío
+    
     const currentPomodoroSettings = user.preferences.pomodoroSettings || {};
 
-    // Función helper para obtener valor de forma segura
+  
     const getValue = (key: string, newValue: any, defaultValue: any): any => {
       if (newValue !== undefined) return newValue;
       if (currentPomodoroSettings && currentPomodoroSettings[key] !== undefined) {
@@ -136,7 +129,7 @@ export class PomodoroService {
       return defaultValue;
     };
 
-    // Crear la nueva configuración
+   
     const newSettings = {
       workDuration: getValue('workDuration', updatePomodoroSettingsDto.workDuration, defaultSettings.workDuration),
       shortBreakDuration: getValue('shortBreakDuration', updatePomodoroSettingsDto.shortBreakDuration, defaultSettings.shortBreakDuration),
@@ -148,7 +141,6 @@ export class PomodoroService {
       notificationsEnabled: getValue('notificationsEnabled', updatePomodoroSettingsDto.notificationsEnabled, defaultSettings.notificationsEnabled)
     };
 
-    // Asignar la nueva configuración
     user.preferences.pomodoroSettings = newSettings;
     await user.save();
 
@@ -156,12 +148,11 @@ export class PomodoroService {
   }
 
   async getStatistics(userId: string, days: number = 7) {
-    // Sesiones totales completadas
+  
     const totalSessions = await this.pomodoroSessionModel.countDocuments({
       userId,
       completed: true
     });
-
 
     const totalMinutesResult = await this.pomodoroSessionModel.aggregate([
       { $match: { userId, completed: true } },
@@ -172,9 +163,7 @@ export class PomodoroService {
       ? Math.floor(totalMinutesResult[0].duration / 60) 
       : 0;
 
-   
     const startDate = moment().subtract(days, 'days').startOf('day').toDate();
-    
 
     const sessionsByDayData = await this.pomodoroSessionModel.aggregate([
       { 
@@ -219,7 +208,6 @@ export class PomodoroService {
       });
     }
 
-
     const sessionsByType = await this.pomodoroSessionModel.aggregate([
       { 
         $match: { 
@@ -239,7 +227,7 @@ export class PomodoroService {
     const formattedSessionsByType = sessionsByType.map(type => ({
       type: type._id,
       count: type.count,
-      duration: Math.floor(type.duration / 60) // Convert to minutes
+      duration: Math.floor(type.duration / 60) 
     }));
 
     return {

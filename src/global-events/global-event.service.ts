@@ -4,9 +4,8 @@ import { UpdateGlobalEventDto } from './dto/update-global-event.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { GlobalEvent } from './entities/global-event.entity';
 import { Model } from 'mongoose';
-import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../cozyApp/src/environments/environments';
+
+
 
 @Injectable()
 export class GlobalEventService {
