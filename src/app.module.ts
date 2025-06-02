@@ -15,6 +15,7 @@ import { ThemeModule } from './theme/theme.module';
 import { EmailService } from './shared/services/email.service';
 import { MockEmailService } from './shared/services/mock-email.service';
 import { HealthModule } from './health/health.module';
+import { AppController } from './app.controller';
 ;
  
 @Module({
