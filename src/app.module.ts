@@ -22,32 +22,35 @@ import { AppController } from './app.controller';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '.env.local'],
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-     useFactory: (configService: ConfigService) => {
-  // Railway puede usar MONGODB_URI o MONGO_URI
-  const mongoUri = 
-    configService.get('MONGODB_URI') || 
-    configService.get('MONGO_URI') || 
-    'mongodb://localhost:27017/cozyapp';
-  
-  const dbName = configService.get('MONGO_DB_NAME') || 'cozyapp';
-  
-  // Debug temporal - mostrar qué variables están disponibles
-  console.log('🔍 Environment variables check:');
-  console.log('- MONGODB_URI:', configService.get('MONGODB_URI') ? 'SET' : 'NOT SET');
-  console.log('- MONGO_URI:', configService.get('MONGO_URI') ? 'SET' : 'NOT SET');
-  console.log('- Using URI:', mongoUri);
-  
-  return {
-    uri: mongoUri,
-    dbName: dbName,
-  };
-},
+      useFactory: (configService: ConfigService) => {
+        const mongoUri = 
+          configService.get('MONGODB_URI') || 
+          configService.get('MONGO_URI') || 
+          'mongodb://localhost:27017/cozyapp';
+        
+        const dbName = configService.get('MONGO_DB_NAME') || 'cozyapp';
+        
+        console.log(' Environment variables check:');
+        console.log('- MONGODB_URI:', configService.get('MONGODB_URI') ? 'SET' : 'NOT SET');
+        console.log('- MONGO_URI:', configService.get('MONGO_URI') ? 'SET' : 'NOT SET');
+        console.log('- EMAIL_HOST:', configService.get('EMAIL_HOST') ? 'SET' : 'NOT SET');
+        console.log('- EMAIL_USER:', configService.get('EMAIL_USER') ? 'SET' : 'NOT SET');
+        console.log('- EMAIL_PASSWORD:', configService.get('EMAIL_PASSWORD') ? 'SET' : 'NOT SET');
+        console.log('- NODE_ENV:', configService.get('NODE_ENV'));
+        console.log('- Using URI:', mongoUri);
+        
+        return {
+          uri: mongoUri,
+          dbName: dbName,
+        };
+      },
     }),
-    SharedModule,
+    SharedModule, 
     AuthModule,
     TaskModule,
     TaskListModule,
@@ -59,10 +62,7 @@ import { AppController } from './app.controller';
   ],
   controllers: [AppController],
   providers: [
-    {
-      provide: EmailService,
-      useClass: process.env.NODE_ENV === 'production' ? EmailService : MockEmailService,
-    }
+
   ]
 })
 export class AppModule {}

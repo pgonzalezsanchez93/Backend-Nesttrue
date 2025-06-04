@@ -10,7 +10,7 @@ async function bootstrap() {
 
 
   const corsOrigins = [
-    'https://cozyapp.netlify.app/', 
+    'https://cozyapp.netlify.app', 
     'http://127.0.0.1:4200',
     process.env.FRONTEND_URL,
     process.env.CORS_ORIGIN

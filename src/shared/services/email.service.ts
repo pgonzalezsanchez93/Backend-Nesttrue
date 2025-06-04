@@ -1,13 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
+    this.initializeTransporter();
+  }
+
+  private initializeTransporter() {
+    const emailConfig = {
       host: this.configService.get('EMAIL_HOST'),
       port: parseInt(this.configService.get('EMAIL_PORT') || '587'),
       secure: this.configService.get('EMAIL_SECURE') === 'true',
@@ -15,7 +20,29 @@ export class EmailService {
         user: this.configService.get('EMAIL_USER'),
         pass: this.configService.get('EMAIL_PASSWORD'),
       },
+    };
+
+    this.logger.log(' Initializing email transporter with config:', {
+      host: emailConfig.host,
+      port: emailConfig.port,
+      secure: emailConfig.secure,
+      user: emailConfig.auth.user,
+      password: emailConfig.auth.pass ? '[SET]' : '[NOT SET]'
     });
+
+    this.transporter = nodemailer.createTransport(emailConfig);
+
+    // Verificar la configuración
+    this.verifyConnection();
+  }
+
+  private async verifyConnection() {
+    try {
+      await this.transporter.verify();
+      this.logger.log('✅ Email transporter verified successfully');
+    } catch (error) {
+      this.logger.error('❌ Email transporter verification failed:', error);
+    }
   }
 
   async sendPasswordResetEmail(
@@ -23,6 +50,8 @@ export class EmailService {
     name: string,
     resetUrl: string,
   ): Promise<void> {
+    this.logger.log(`📤 Sending password reset email to: ${to}`);
+    
     const mailOptions = {
       from: `"${this.configService.get('EMAIL_FROM_NAME') || 'CozyApp'}" <${this.configService.get('EMAIL_FROM') || 'noreply@cozyapp.com'}>`,
       to,
@@ -48,9 +77,13 @@ export class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(`✅ Password reset email sent successfully to: ${to}`, {
+        messageId: result.messageId,
+        response: result.response
+      });
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error(`❌ Error sending password reset email to: ${to}`, error);
       throw new Error('Error al enviar el correo de restablecimiento de contraseña');
     }
   }
@@ -59,6 +92,8 @@ export class EmailService {
     to: string,
     name: string,
   ): Promise<void> {
+    this.logger.log(`📤 Sending welcome email to: ${to}`);
+    
     const mailOptions = {
       from: `"${this.configService.get('EMAIL_FROM_NAME') || 'CozyApp'}" <${this.configService.get('EMAIL_FROM') || 'noreply@cozyapp.com'}>`,
       to,
@@ -81,10 +116,14 @@ export class EmailService {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.log(` Email de bienvenida enviado correctamente a: ${to}`, {
+        messageId: result.messageId,
+        response: result.response
+      });
     } catch (error) {
-      console.error('Error sending welcome email:', error);
-     
+      this.logger.error(` Error mandando el email a: ${to}`, error);
+    
     }
   }
 }
