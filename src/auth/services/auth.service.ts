@@ -45,29 +45,29 @@ async create(createUserDto: CreateUserDto) {
 
 async register(registerDto: RegisterUserDto): Promise<LoginResponse> {
     try {
-      console.log('📝 Iniciando registro para:', registerDto.email);
+      console.log(' Iniciando registro para:', registerDto.email);
       
       const user = await this.create(registerDto);
-      console.log('✅ Usuario registrado exitosamente:', user.email);
+      console.log('✅Usuario registrado exitosamente:', user.email);
       
 
       try {
         await this.emailService.sendWelcomeEmail(user.email, user.name);
-        console.log('📧 Email de bienvenida enviado a:', user.email);
+        console.log(' Email de bienvenida enviado a:', user.email);
       } catch (emailError) {
-        console.warn('⚠️ No se pudo enviar email de bienvenida:', emailError.message);
+        console.warn(' No se pudo enviar email de bienvenida:', emailError.message);
        
       }
       
       const token = this.getJwtToken({ id: user._id });
-      console.log('🔑 Token generado para usuario:', user._id);
+      console.log(' Token generado para usuario:', user._id);
       
       return {
         user: user,
         token: token
       };
     } catch (error) {
-      console.error('❌ Error en registro:', error);
+      console.error(' Error en registro:', error);
       throw error;
     }
   }
@@ -103,16 +103,16 @@ async register(registerDto: RegisterUserDto): Promise<LoginResponse> {
     
       await this.emailService.sendPasswordResetEmail(user.email, user.name, resetUrl);
       
-      console.log(`✅ Password reset email sent successfully to: ${email}`);
-      console.log(`🔗 Reset URL: ${resetUrl}`);
+      console.log(` Password reset email sent successfully to: ${email}`);
+      console.log(` Reset URL: ${resetUrl}`);
       
     } catch (emailError) {
-      console.error('❌ Error sending password reset email:', emailError);
+      console.error(' Error sending password reset email:', emailError);
       
       if (process.env.NODE_ENV !== 'production') {
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:4200'}/auth/reset-password?token=${resetToken}`;
-        console.log(`🔧 DESARROLLO - Token de reset: ${resetToken}`);
-        console.log(`🔧 DESARROLLO - URL de reset: ${resetUrl}`);
+        console.log(` DESARROLLO - Token de reset: ${resetToken}`);
+        console.log(` DESARROLLO - URL de reset: ${resetUrl}`);
       }
     }
     

@@ -31,29 +31,41 @@ export class AuthController {
 @HttpCode(200)
 async resetPassword(@Body() body: { token: string, password: string }): Promise<{ message: string }> {
   console.log('🔄 Reset password endpoint called:', {
-    hasToken: !!body.token,
-    tokenLength: body.token?.length,
-    hasPassword: !!body.password,
-    passwordLength: body.password?.length
-  });
+      hasToken: !!body.token,
+      tokenLength: body.token?.length,
+      hasPassword: !!body.password,
+      timestamp: new Date().toISOString()
+    });
 
   try {
     await this.authService.resetPassword(body.token, body.password);
     
-    console.log('✅ Password reset successful');
+    console.log('Password reset successful');
     return { message: 'Contraseña restablecida con éxito' };
   } catch (error) {
-    console.error('❌ Reset password endpoint error:', error);
+    console.error('Reset password endpoint error:', error);
     throw error;
   }
 }
 
-  @Post('password/request-reset')
+ @Post('password/request-reset')
   @HttpCode(200)
   async requestPasswordReset(@Body() body: { email: string }): Promise<{ message: string }> {
-    await this.authService.requestPasswordReset(body.email);
-    return { message: 'Si el correo existe en nuestra base de datos, recibirás un enlace para restablecer tu contraseña.' };
+    console.log('🔄 Request password reset endpoint called:', {
+      email: body.email,
+      timestamp: new Date().toISOString()
+    });
+    
+    try {
+      const result = await this.authService.requestPasswordReset(body.email);
+      console.log(' Request password reset successful');
+      return result;
+    } catch (error) {
+      console.error(' Request password reset error:', error);
+      throw error;
+    }
   }
+
 
   @UseGuards(AuthGuard)
   @Get('check-token')

@@ -19,10 +19,10 @@ import { MockEmailService } from './services/mock-email.service';
         });
         
         if (isDevelopment) {
-          console.log('📧 Using MockEmailService for development');
+          console.log(' Using MockEmailService for development');
           return new MockEmailService();
         } else {
-          console.log('📧 Using EmailService for production');
+          console.log(' Using EmailService for production');
           return new EmailService(configService);
         }
       },
